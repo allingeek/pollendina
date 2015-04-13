@@ -1,7 +1,7 @@
 # pollendina
 Pollendina is an X.509 identity provisioning service designed to simplify mutual TLS authentication for microservices deployed in containers.
 
-Provisioning a service for use in a new contiainer would consist of the following steps:
+Provisioning a service for use in a new container would consist of the following steps:
 * Tell Pollendina that a container for service X at hostname Y is about to be provisioned.
 * Provision the container.
 * On service initialization, create a new RSA key pair and certificate signing request.
