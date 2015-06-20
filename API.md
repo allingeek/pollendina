@@ -20,5 +20,7 @@ Request by the client to sign their CSR
 
 ##Client Error handling
 
+```
 Authorized: 200 response
 Not authorized: 403 response 
+```
