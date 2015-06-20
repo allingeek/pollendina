@@ -1,13 +1,13 @@
 package main
 
 import (
-    "flag"
-    "net/http"
+	"flag"
+	"net/http"
 )
 
 func main() {
 
-        flag.Parse()
+	flag.Parse()
 
 	http.HandleFunc("/v1/authorize", Authorize)
 	http.HandleFunc("/v1/sign", Sign)
