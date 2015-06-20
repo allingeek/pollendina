@@ -15,7 +15,8 @@ Request by the client to sign their CSR
 ```
 /v1/sign
 	ServiceName(UUID)
-```	CSR
+	CSR
+```
 
 ##Client Error handling
 Authorized: 200 response
