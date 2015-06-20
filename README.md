@@ -11,3 +11,6 @@ Provisioning a service for use in a new container would consist of the following
 * The calling container installs the returned certificate and private key (either keep it in memory or write it encrypted to a volume).
 * Pollendina should then store the certificate as a result of the CSR signing action. Signing calls are idempotent. Since the private key material is never transmitted there is no risk in returning the certificate after approval has lapsed.
 
+## Resources
+
+There is a great answer on StackOverflow that goes over running a certificate authority, and creating certificates at: http://stackoverflow.com/questions/21297139/how-do-you-sign-certificate-signing-request-with-your-certification-authority
