@@ -52,9 +52,9 @@ docker run -i -t <username>/<imageName> /bin/bash
 
   Pollendina CA can be used / tested standalone, without a client container, using ``curl`` client:
 
-  curl —dat\"cn=dario&token=100\" http://192.168.59.103:33004/v1/authorize
+  `curl —da "cn=dario&token=100" http://192.168.59.103:33004/v1/authori`e
 
-  curl -v http://192.168.59.103:33004/v1/sign/100 -uploadFile id.csr
+  `curl -v http://192.168.59.103:33004/v1/sign/100 -uploadFile id.csr`
 
   See the [API.md] file for more details
 
