@@ -10,10 +10,13 @@ echo $CERTIFICATE_INFO
 # Generate key and create CSR
 openssl req  -new -newkey rsa:4096 -days 365 -nodes -subj "${CERTIFICATE_INFO}" -keyout /certs/${KEY_NAME}.key -out /certs/${KEY_NAME}.csr
 
+echo Authenticating with token: $POLLENDINA
+
 # Send CSR to Certificate Authority
-curl -s -D status --data "$(cat /certs/${KEY_NAME}.csr)" https://$CA_IP/vi/sign -o /certs/${KEY_NAME}.crt
+curl -X PUT -s -D status --data "$(cat /certs/${KEY_NAME}.csr)" https://$CA_IP/vi/sign/${POLLENDINA_TOCKEN} -o /certs/${KEY_NAME}.crt
 
 STATUS=$(cat status | grep HTTP/1.1 | awk {'print $2'})
+
 
 if [ "$STATUS" = "200" ]; then
    echo Container key signed by Certificate Authority: Successfully
