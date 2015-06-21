@@ -9,12 +9,13 @@ import (
         "math/rand"
 	"net/http"
 	"os/exec"
+        "path"
         "encoding/pem" 
 )
 var db = map[string]string{}
 var csrLocation = "/var/csr/"
 var crtLocation = "/var/crt/"
-var confLocation = "/opt/pollendina/openssl-ca.conf"
+var confLocation = "/opt/pollendina/openssl-ca.cnf"
 
 type Tuple struct { CN, Token string }
 var updates = make(chan Tuple)
@@ -69,6 +70,10 @@ func Authorize(w http.ResponseWriter, req *http.Request) {
 
 func Sign(w http.ResponseWriter, req *http.Request) {
 	log.Println("Received sign call.")
+
+        // Pull the token out of the path
+        _, token := path.Split(req.URL.Path)
+        log.Printf("Received signing request for token %s", token)
 
 	// Upload the CSR and copy it to some known location
         body, err := ioutil.ReadAll(req.Body)
