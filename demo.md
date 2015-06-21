@@ -2,9 +2,6 @@
 
 cd example
 
-# Access example
-cd example
-
 # Generate root certificate and run CA. Keys will be stored in the directory
 docker run -d --name pollendina_ca -p 33004:33004 -v "$PWD":/opt/pollendina/ pollendina/pollendina
 

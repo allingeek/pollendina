@@ -24,8 +24,8 @@ The above command will start Pollendina in a new container and provision a new C
 ## Main Contributors 
 
   - [Jeff Nickoloff](https://github.com/allingeek)
-  - [Jason Huddleston](https://github.com/huddlesj)
   - [Dário Nascimento](https://github.com/dnascimento)
+  - [Jason Huddleston](https://github.com/huddlesj)
   - [Madhuri Yechuri](https://github.com/myechuri)
   - [Henry Kendall](https://github.com/hskendall)
 
@@ -36,8 +36,6 @@ The above command will start Pollendina in a new container and provision a new C
   `curl --data "cn=dario&token=100" http://192.168.59.103:33004/v1/authorize`
 
   `curl -v http://192.168.59.103:33004/v1/sign/100 --upload-file id.csr`
-
-  See the [API](API.md) file for more details
 
 ## Resources
 
