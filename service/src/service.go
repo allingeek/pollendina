@@ -2,25 +2,26 @@ package main
 
 import (
 	"crypto/x509"
+	"encoding/pem"
 	"flag"
-        "fmt"
-        "log"
         "io"
 	"io/ioutil"
-        "math/rand"
+	"log"
+	"math/rand"
 	"net/http"
         "os"
 	"os/exec"
-        "path"
-        "regexp"
-        "encoding/pem" 
+	"path"
+	"regexp"
 )
+
 var db = map[string]string{}
 var csrLocation = "/var/csr/"
 var crtLocation = "/var/crt/"
 var confLocation = "/opt/pollendina/openssl-ca.cnf"
 
-type Tuple struct { CN, Token string }
+type Tuple struct{ CN, Token string }
+
 var updates = make(chan Tuple)
 
 const (
@@ -57,15 +58,15 @@ func main() {
 
         InitLogs(os.Stdout, os.Stdout, os.Stderr)
 
-        rh := new(RegexHandler)
+	rh := new(RegexHandler)
 
-        authPathPattern,_ := regexp.Compile("/v1/authorize")
-        signPathPattern,_ := regexp.Compile("/v1/sign/.*")
+	authPathPattern, _ := regexp.Compile("/v1/authorize")
+	signPathPattern, _ := regexp.Compile("/v1/sign/.*")
 
 	rh.HandleFunc(authPathPattern, Authorize)
 	rh.HandleFunc(signPathPattern, Sign)
 
-        go MapWriter()
+	go MapWriter()
 
 	// Placeholder for authentication / authorization middleware on authorize call.
 
@@ -81,7 +82,7 @@ func MapWriter() {
                       case t,ok := <-updates:
                           if (!ok) {
                                Error.Println("Publisher channel closed. Stopping.")
-                               return;
+                               return
                           }
                           Info.Println("Setting key %s to value %s", t.Token, t.CN)
                           db[t.Token] = t.CN
@@ -97,8 +98,8 @@ func Authorize(w http.ResponseWriter, req *http.Request) {
 
 	// queue for write to map
 	// ...
-        t := Tuple{cn, token}
-        updates <- t
+	t := Tuple{cn, token}
+	updates <- t
 
         Info.Println("Service: %s", cn)
         Info.Println("Token: %s", token)
@@ -119,8 +120,8 @@ func Sign(w http.ResponseWriter, req *http.Request) {
                 return
         }
 
-        // Get the registered CN for the provided token (or fail)
-        authCn := db[token]
+	// Get the registered CN for the provided token (or fail)
+	authCn := db[token]
 
         if (authCn == "") {
                 Warning.Println("Unauthorized CN.")
@@ -148,7 +149,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 
 	// Parse the CSR
 	rawCSR, _ := ioutil.ReadFile(csrFilename)
-        decodedCSR, _ := pem.Decode(rawCSR)
+	decodedCSR, _ := pem.Decode(rawCSR)
 	csr, err := x509.ParseCertificateRequest(decodedCSR.Bytes)
 	if err != nil {
 		Error.Println(err.Error())
@@ -177,13 +178,13 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	o_flag := "-out"
 	outputFile := crtLocation + randoName + ".crt"
 	i_flag := "-infiles"
-        b_flag := "-batch"
+	b_flag := "-batch"
 
 	// Sign the CSR with OpenSSL
 	cmd := exec.Command(app, command, b_flag, c_flag, confLocation, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, csrFilename)
-        args := fmt.Sprintf("%s %s %s %s %s %s %s %s %s %s %s %s %s", app, command, b_flag, c_flag, confLocation, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, csrFilename)
+	args := fmt.Sprintf("%s %s %s %s %s %s %s %s %s %s %s %s %s", app, command, b_flag, c_flag, confLocation, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, csrFilename)
 	fmt.Println(args)
-        stdOut, err := cmd.Output()
+	stdOut, err := cmd.Output()
 	if err != nil {
                 Error.Println("OpenSSL stdout: %s", string(stdOut))
 		Error.Println("OpenSSL stderr: %s", err.Error())
@@ -192,25 +193,25 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Open the output file for reading and stream it back on the response
-        outputData, err := ioutil.ReadFile(outputFile)
+	outputData, err := ioutil.ReadFile(outputFile)
 	w.Write(outputData)
 }
 
 type MuxRoute struct {
-    pattern *regexp.Regexp
-    handler http.Handler
+	pattern *regexp.Regexp
+	handler http.Handler
 }
 
 type RegexHandler struct {
-    rs []*MuxRoute
+	rs []*MuxRoute
 }
 
 func (rh *RegexHandler) Handler(p *regexp.Regexp, h http.Handler) {
-    rh.rs = append(rh.rs, &MuxRoute{p, h})
+	rh.rs = append(rh.rs, &MuxRoute{p, h})
 }
 
 func (rh *RegexHandler) HandleFunc(p *regexp.Regexp, h func(http.ResponseWriter, *http.Request)) {
-    rh.rs = append(rh.rs, &MuxRoute{p, http.HandlerFunc(h)})
+	rh.rs = append(rh.rs, &MuxRoute{p, http.HandlerFunc(h)})
 }
 
 func (rh *RegexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -224,4 +225,3 @@ func (rh *RegexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     // no pattern matched; send 404 response
     http.NotFound(w, r)
 }
-
