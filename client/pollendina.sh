@@ -18,7 +18,7 @@ curl --cacert /certs/cacert.pem -X PUT -s -D status --data "$(cat /certs/${KEY_N
 STATUS=$(cat status | grep HTTP/1.1 | awk {'print $2'})
 
 
-if [ "$STATUS" = "200" ]; then
+if [ '$STATUS'='100 200' ]; then
    echo Container key signed by Certificate Authority: Successfully
 else
 	echo Error while signing container key: $STATUS
