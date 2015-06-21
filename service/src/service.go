@@ -21,7 +21,7 @@ var csrLocation = "/var/csr/"
 var crtLocation = "/var/crt/"
 var confLocation = "/opt/pollendina/openssl-ca.cnf"
 
-var port = flag.Int("port", 33004, "Default port for Pollendina CA.")
+var port = flag.String("port", ":33004", "Default port for Pollendina CA.")
 
 type Tuple struct{ CN, Token string }
 
