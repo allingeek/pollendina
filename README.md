@@ -12,7 +12,6 @@ Provisioning a service for use in a new container would consist of the following
 * Pollendina validates that the CSR is approved for provisioning.
 * Pollendina signs the CSR with the organization's CA private key and returns the PEM encoded public key for the service in the requesting container (X.509 subject).
 * The calling container installs the returned certificate and private key (either keep it in memory or write it encrypted to a volume).
-* Pollendina should then store the certificate as a result of the CSR signing action. Signing calls are idempotent. Since the private key material is never transmitted there is no risk in returning the certificate after approval has lapsed.
 
 ## Generate pollendina image
 
