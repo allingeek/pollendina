@@ -21,29 +21,6 @@ Provisioning a service for use in a new container would consist of the following
 
 The above command will start Pollendina in a new container and provision a new CA in the present working directory. The files created at PWD represent the full state of the CA. If Pollendina is stopped, and another Pollendina container is started from this folder it will resume the state of the previous CA. One file named openssl-ca.cnf is created. You can customize the settings for your CA by modifying this file and restarting Pollendina.
 
-## Generate pollendina image and start a container
-
-```
-cd service/src
-
-docker build -t pollendina .
-
-docker run -d --name pollendina_ca -p 33004:33004 pollendina
-```
-
-## Generate base image
-docker build -t <username>/<imageName> .
-
-## Run base image
-docker run -i -t <username>/<imageName> /bin/bash
-
-1st: Generate root certificate key using generator image
-2nd: Build /example image with the root certificate
-3th: Launch the CA container
-4th: Launch containers
-
-`docker run -d --name pollendina_ca -p 33004:33004 -v /var/csr -v /var/crt -v "$PWD":/opt/pollendina/ pollendina/debian`
-
 ## Architecture
 
 * Pollendina server signs requests using openssl-ca.cnf, cakey.pem, index.txt, and serial.txt.
