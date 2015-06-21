@@ -23,11 +23,11 @@ The above command will start Pollendina in a new container and provision a new C
 
 ## Main Contributors 
 
-  - Jeff Nickoloff (allingeek)
-  - Jason Huddleston (huddlesj)
-  - Dário Nascimento (dnascimento)
-  - Madhuri Yechuri (myechuri)
-  - Henry Kendall (hskendall)
+  - [Jeff Nickoloff](https://github.com/allingeek)
+  - [Jason Huddleston](https://github.com/huddlesj)
+  - [Dário Nascimento](https://github.com/dnascimento)
+  - [Madhuri Yechuri](https://github.com/myechuri)
+  - [Henry Kendall](https://github.com/hskendall)
 
 ## API Guide
 
