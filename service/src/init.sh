@@ -21,7 +21,7 @@ for i in ${FILES[@]}; do
   fi
 done
 
-if [ -f $DDIR/cakey.pem ];do 
+if [ -f $DDIR/cakey.pem ]; do 
   openssl req -x509 -config openssl-ca.cnf -newkey rsa:4096 -sha256 -nodes -out cacert.pem -outform PEM
 done
 
