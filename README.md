@@ -1,5 +1,5 @@
 # Pollendina
-Pollendina is an X.509 identity provisioning service designed to simplify mutual TLS authentication for microservices deployed in containers.
+Pollendina is an X.509 identity provisioning service designed to simplify mutual TLS authentication for microservices deployed in containers. This project helps you provision your PKI as easily as you provision containers and exposes an API for integration with your existing scheduling / deployment infrastructure.
 
 **Pollendina accomplishes this without distribution or centralized management of secrets!**
 
