@@ -9,13 +9,15 @@ import (
         "math/rand"
 	"net/http"
 	"os/exec"
-	"time"
         "encoding/pem" 
 )
-var db = map[string]int{}
+var db = map[string]string{}
 var csrLocation = "/var/csr/"
 var crtLocation = "/var/crt/"
 var confLocation = "/opt/pollendina/openssl-ca.conf"
+
+type Tuple struct { CN, Token string }
+var updates = make(chan Tuple)
 
 func main() {
 
@@ -24,35 +26,43 @@ func main() {
 	http.HandleFunc("/v1/authorize", Authorize)
 	http.HandleFunc("/v1/sign", Sign)
 
+        go MapWriter()
+
 	// Placeholder for authentication / authorization middleware on authorize call.
 
 	err := http.ListenAndServe(":33004", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
+}
 
+func MapWriter() {
+      for {
+              select {
+                      case t,ok := <-updates:
+                          if (!ok) {
+                               log.Printf("Publisher channel closed. Stopping.")
+                               return;
+                          }
+                          log.Printf("Setting key %s to value %s", t.Token, t.CN)
+                          db[t.Token] = t.CN
+              }
+      }
 }
 
 func Authorize(w http.ResponseWriter, req *http.Request) {
 	log.Println("Received authorize call.")
 	// Parse input
-	sn := req.FormValue("cn")
-	ttl := req.FormValue("ttl")
-
-	// Construct ttl
-	d, err := time.ParseDuration(ttl)
-        if err != nil {
-            log.Println(err)
-            w.WriteHeader(http.StatusBadRequest)
-            return
-        }
-	expires := time.Now().Add(d)
+	cn := req.FormValue("cn")
+	token := req.FormValue("token")
 
 	// queue for write to map
 	// ...
+        t := Tuple{cn, token}
+        updates <- t
 
-        log.Println("Service: " + sn)
-        log.Println("Expires: " + expires.String())
+        log.Println("Service: " + cn)
+        log.Println("Token: " + token)
 
 	req.Body.Close()
 }
