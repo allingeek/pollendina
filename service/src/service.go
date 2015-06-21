@@ -82,6 +82,21 @@ func Sign(w http.ResponseWriter, req *http.Request) {
         _, token := path.Split(req.URL.Path)
         log.Printf("Received signing request for token %s", token)
 
+        if len(token) == 0 {
+                log.Println("No token provided.")
+                w.WriteHeader(http.StatusBadRequest)
+                return
+        }
+
+        // Get the registered CN for the provided token (or fail)
+        authCn := db[token]
+
+        if (authCn == "") {
+                log.Println("unauthorized")
+                w.WriteHeader(http.StatusUnauthorized)
+                return
+        }
+
 	// Upload the CSR and copy it to some known location
         body, err := ioutil.ReadAll(req.Body)
         if err != nil {
@@ -111,8 +126,13 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Println("Received CSR for: " + csr.Subject.CommonName)
+        
 	// check authorization for the provided commonname
-	// TODO ...
+        if (csr.Subject.CommonName != authCn) {
+                log.Println("unauthorized")
+                w.WriteHeader(http.StatusUnauthorized)
+                return
+        }
 
 	// Build the command for exec
 	// openssl ca -config openssl-ca.cnf -policy signing_policy -extensions signing_req -out servercert.pem -infiles servercert.csr
