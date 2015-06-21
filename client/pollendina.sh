@@ -2,9 +2,8 @@
 
 #GLOBAL VARS REQUIRED: CA_IP, COMMON_NAME
 KEY_NAME="id"
-ENV COMMON_NAME=pollendina CA_IP=pollendinahost COUNTRY=US STATE=California CITY=SF ORGANIZATION=Pollendina COMMON_NAME=Pollendina
 
-CERTIFICATE_INFO="/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}$/CN=${COMMON_NAME}"
+CERTIFICATE_INFO="/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}/CN=${COMMON_NAME}"
 
 echo $CERTIFICATE_INFO
 
@@ -14,15 +13,15 @@ openssl req  -new -newkey rsa:4096 -days 365 -nodes -subj "${CERTIFICATE_INFO}" 
 echo Authenticating with token: $POLLENDINA_TOCKEN
 
 # Send CSR to Certificate Authority
-curl --cacert /certs/cacert.pem -X PUT -s -D status --data "$(cat /certs/${KEY_NAME}.csr)" http://$CA_IP:33004/vi/sign/${POLLENDINA_TOCKEN} -o /certs/${KEY_NAME}.crt
+curl --cacert /certs/cacert.pem -X PUT -s -D status --data "$(cat /certs/${KEY_NAME}.csr)" http://$CA_IP/v1/sign/${POLLENDINA_TOCKEN} -o /certs/${KEY_NAME}.crt
 
 STATUS=$(cat status | grep HTTP/1.1 | awk {'print $2'})
 
 
-if [ "$STATUS" = "200" ]; then
+if [ '$STATUS'='100 200' ]; then
    echo Container key signed by Certificate Authority: Successfully
 else
-	echo Error while signing container key
+	echo Error while signing container key: $STATUS
 fi
 
 rm status

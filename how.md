@@ -8,7 +8,5 @@ docker build -t myimage .
 CA_IP=192.168.59.103:33004
 POLLENDINA_TOCKEN=$(openssl rand -hex 32)
 COMMON_NAME="dario"
-curl --cacert "cacert.pem" --data "token=${POLLENDINA_TOCKEN}&cn=${COMMON_NAME}" http://$CA_IP/v1/authorization
-docker run -e POLLENDINA_TOCKEN="$POLLENDINA_TOCKEN" -e COMMON_NAME="$COMMON_NAME" -i -t myimage /bin/bash
-
-
+curl --cacert "cacert.pem" --data "token=${POLLENDINA_TOCKEN}&cn=${COMMON_NAME}" http://$CA_IP/v1/authorize
+docker run -e POLLENDINA_TOCKEN="$POLLENDINA_TOCKEN" -e COMMON_NAME="$COMMON_NAME" -e CA_IP="$CA_IP" -i -t myimage /bin/bash

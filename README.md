@@ -15,48 +15,29 @@ Provisioning a service for use in a new container would consist of the following
 * Pollendina signs the CSR with the organization's CA private key and returns the PEM encoded public key for the service in the requesting container (X.509 subject).
 * The calling container installs the returned certificate and private key (either keep it in memory or write it encrypted to a volume).
 
-## Generate pollendina image and start a container
+## Launch Pollendina
 
-cd service/src
+`docker run -d -p 33004:33004 -v "$PWD":/opt/pollendina pollendina/pollendina`
 
-docker build -t pollendina .
-
-docker run -d --name pollendina_ca -p 33004:33004 pollendina
-
-## Generate base image
-docker build -t <username>/<imageName> .
-
-## Run base image
-docker run -i -t <username>/<imageName> /bin/bash
-
-1st: Generate root certificate key using generator image
-2nd: Build /example image with the root certificate
-3th: Launch the CA container
-4th: Launch containers
-
-`docker run -d --name pollendina_ca -p 33004:33004 -v /var/csr -v /var/crt -v "$PWD":/opt/pollendina/ pollendina/debian`
-
-## Architecture
-
-* Pollendina server signs requests using openssl-ca.cnf, cakey.pem, index.txt, and serial.txt.
+The above command will start Pollendina in a new container and provision a new CA in the present working directory. The files created at PWD represent the full state of the CA. If Pollendina is stopped, and another Pollendina container is started from this folder it will resume the state of the previous CA. One file named openssl-ca.cnf is created. You can customize the settings for your CA by modifying this file and restarting Pollendina.
 
 ## Main Contributors 
 
-  - Jeff Nickoloff (allingeek)
-  - Jason Huddleston (huddlesj)
-  - Dário Nascimento (dnascimento)
-  - Madhuri Yechuri (myechuri)
-  - Henry Kendall (hskendall)
+  - [Jeff Nickoloff](https://github.com/allingeek)
+  - [Jason Huddleston](https://github.com/huddlesj)
+  - [DÃ¡rio Nascimento](https://github.com/dnascimento)
+  - [Madhuri Yechuri](https://github.com/myechuri)
+  - [Henry Kendall](https://github.com/hskendall)
 
 ## API Guide
 
   Pollendina CA can be used / tested standalone, without a client container, using ``curl`` client:
 
-  `curl -data "cn=dario&token=100" http://192.168.59.103:33004/v1/authorize`
+  `curl --data "cn=dario&token=100" http://192.168.59.103:33004/v1/authorize`
 
   `curl -v http://192.168.59.103:33004/v1/sign/100 --upload-file id.csr`
 
-  See the [API.md] file for more details
+  See the [API](API.md) file for more details
 
 ## Resources
 
