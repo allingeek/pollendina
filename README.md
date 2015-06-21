@@ -15,13 +15,21 @@ Provisioning a service for use in a new container would consist of the following
 * Pollendina signs the CSR with the organization's CA private key and returns the PEM encoded public key for the service in the requesting container (X.509 subject).
 * The calling container installs the returned certificate and private key (either keep it in memory or write it encrypted to a volume).
 
+## Launch Pollendina
+
+`docker run -d -p 33004:33004 -v "$PWD":/opt/pollendina pollendina/pollendina`
+
+The above command will start Pollendina in a new container and provision a new CA in the present working directory. The files created at PWD represent the full state of the CA. If Pollendina is stopped, and another Pollendina container is started from this folder it will resume the state of the previous CA. One file named openssl-ca.cnf is created. You can customize the settings for your CA by modifying this file and restarting Pollendina.
+
 ## Generate pollendina image and start a container
 
+```
 cd service/src
 
 docker build -t pollendina .
 
 docker run -d --name pollendina_ca -p 33004:33004 pollendina
+```
 
 ## Generate base image
 docker build -t <username>/<imageName> .
