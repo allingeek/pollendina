@@ -41,7 +41,7 @@ The above command will start Pollendina in a new container and provision a new C
 
   `curl -v http://192.168.59.103:33004/v1/sign/100 -uploadFile id.csr`
 
-  See the [API.md] file for more details
+  See the [API](API.md) file for more details
 
 ## Resources
 
