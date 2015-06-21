@@ -21,10 +21,6 @@ Provisioning a service for use in a new container would consist of the following
 
 The above command will start Pollendina in a new container and provision a new CA in the present working directory. The files created at PWD represent the full state of the CA. If Pollendina is stopped, and another Pollendina container is started from this folder it will resume the state of the previous CA. One file named openssl-ca.cnf is created. You can customize the settings for your CA by modifying this file and restarting Pollendina.
 
-## Architecture
-
-* Pollendina server signs requests using openssl-ca.cnf, cakey.pem, index.txt, and serial.txt.
-
 ## Main Contributors 
 
   - Jeff Nickoloff (allingeek)
