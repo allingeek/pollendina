@@ -17,9 +17,19 @@ for i in ${FILES[@]}; do
   fi
 done
 
+<<<<<<< HEAD
+=======
+ touch /opt/pollendina/index.txt
 
-# openssl req -x509 -config openssl-ca.cnf -newkey rsa:4096 -sha256 -nodes -out cacert.pem -outform PEM
+echo 01 >> /opt/pollendina/serial.txt
+>>>>>>> origin/master
 
+ openssl req -x509 -config openssl-ca.cnf -newkey rsa:4096 -sha256 -nodes -out cacert.pem -outform PEM
+
+<<<<<<< HEAD
+=======
+ cp /pollendina/openssl-ca.cnf /opt/pollendina/openssl-ca.cnf
+>>>>>>> origin/master
 
 
 exec "$@" # run the default command
