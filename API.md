@@ -2,19 +2,20 @@
 
 ##Authorization
 Used by the CI/CD tool chain to authorize a new instance
+- cn (Alpanumeric string for serice common name)
 
 ```
-/v1/authorize
-	ServiceName(UUID)
-	Window(Seconds)
+/v1/authorize/
+	cn(UUID)
 ```
 
 ##Sign
 Request by the client to sign their CSR
+- token (Alpha numeric string)
+- CSR (Certificate Signing request)
 
 ```
-/v1/sign
-	ServiceName(UUID)
+/v1/sign/{token}
 	CSR
 ```
 

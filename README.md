@@ -21,7 +21,7 @@ docker build -t <username>/<imageName> .
 
 
 ## Run base image
-docker run -i -t <username>/<imageName> /bin/sh
+docker run -i -t <username>/<imageName> /bin/bash
 
 
 

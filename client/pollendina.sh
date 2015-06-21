@@ -8,7 +8,7 @@ CERTIFICATE_INFO="/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}$/CN=${CO
 echo $CERTIFICATE_INFO
 
 # Generate key and create CSR
-/usr/bin/openssl req  -new -newkey rsa:4096 -days 365 -nodes -subj "${CERTIFICATE_INFO}" -keyout /certs/${KEY_NAME}.key -out /certs/${KEY_NAME}.csr
+openssl req  -new -newkey rsa:4096 -days 365 -nodes -subj "${CERTIFICATE_INFO}" -keyout /certs/${KEY_NAME}.key -out /certs/${KEY_NAME}.csr
 
 # Send CSR to Certificate Authority
 curl -s -D status --data "$(cat /certs/${KEY_NAME}.csr)" https://$CA_IP/vi/sign -o /certs/${KEY_NAME}.crt
@@ -22,5 +22,10 @@ else
 fi
 
 rm status
+
+echo installing CA certificate
+
+cp /certs/cacert.pem /usr/local/share/ca-certificates/pollendina.crt
+update-ca-certificates
 
 exec $@
