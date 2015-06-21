@@ -58,20 +58,10 @@ docker run -e POLLENDINA_TOCKEN="$POLLENDINA_TOCKEN" -e COMMON_NAME="$COMMON_NAM
 ```
 
 ## test mutual authentication from client to server
-`curl -v -s -k --key /certs/id.key --cert /certs/id.crt https://hw`
 
-
-
-
-
-
-
-
-
-
+```
+curl -v -s -k --key /certs/id.key --cert /certs/id.crt https://hw`
 curl -v -debug -s -k --key /certs/id.key --cert /certs/id.crt -X GET https://hw
-
-
 docker run -e POLLENDINA_TOCKEN="$POLLENDINA_TOCKEN" -e COMMON_NAME="$COMMON_NAME" -e CA_IP="$CA_IP" -i -t --link backstabbing_franklin:/hw customer /bin/bash
-
 docker run -e POLLENDINA_TOCKEN="$POLLENDINA_TOCKEN" -e COMMON_NAME="$COMMON_NAME" -e CA_IP="$CA_IP" -i -t server /bin/bash
+```
