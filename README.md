@@ -28,8 +28,7 @@ docker run -i -t <username>/<imageName> /bin/bash
 3th: Launch the CA container
 4th: Launch containers
 
-
-
+`docker run -d --name pollendina_ca -p 33004:33004 -v /var/csr -v /var/crt -v "$PWD":/opt/pollendina/ pollendina`
 
 ## Main Contributors 
 
