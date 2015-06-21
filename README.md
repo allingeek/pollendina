@@ -23,7 +23,9 @@ docker build -t <username>/<imageName> .
 ## Run base image
 docker run -i -t <username>/<imageName> /bin/bash
 
+## Start the Pollendina service in a container
 
+`docker run -d --name pollendina_ca -p 33004:33004 -v /var/csr -v /var/crt -v "$PWD":/opt/pollendina/ pollendina`
 
 ## Main Contributors 
 
