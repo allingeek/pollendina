@@ -13,8 +13,9 @@ import (
         "encoding/pem" 
 )
 var db = map[string]int{}
-var csrLocation = "/var/csr"
-var crtLocation = "/var/crt"
+var csrLocation = "/var/csr/"
+var crtLocation = "/var/crt/"
+var confLocation = "/opt/pollendina/openssl-ca.conf"
 
 func main() {
 
@@ -68,7 +69,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
         }
 
         randoName := fmt.Sprintf("%d.csr", rand.Int63())
-        csrFilename := "/Users/jnickol/test/" + randoName
+        csrFilename := csrLocation + randoName
         err = ioutil.WriteFile(csrFilename, body, 0777)
         if err != nil {
                 log.Println(err)
@@ -96,18 +97,19 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	app := "openssl"
 	command := "ca"
 	c_flag := "-config"
-	c_value := "openssl-ca.cnf"
 	p_flag := "-policy"
 	p_value := "signing_policy"
 	e_flag := "-extensions"
 	e_value := "signing_req"
 	o_flag := "-out"
-	outputFile := "/Users/jnickol/test/" + randoName + ".crt"
+	outputFile := crtLocation + randoName + ".crt"
 	i_flag := "-infiles"
-        v_flag := "-verbose"
+        b_flag := "-batch"
 
 	// Sign the CSR with OpenSSL
-	cmd := exec.Command(app, command, v_flag, c_flag, c_value, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, csrFilename)
+	cmd := exec.Command(app, command, b_flag, c_flag, confLocation, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, csrFilename)
+        args := fmt.Sprintf("%s %s %s %s %s %s %s %s %s %s %s %s %s", app, command, b_flag, c_flag, confLocation, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, csrFilename)
+	fmt.Println(args)
         stdOut, err := cmd.Output()
 	if err != nil {
                 log.Println("STDOUT: " + string(stdOut))

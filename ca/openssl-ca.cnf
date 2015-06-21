@@ -23,6 +23,7 @@ default_keyfile     = cakey.pem
 distinguished_name  = ca_distinguished_name
 x509_extensions     = ca_extensions
 string_mask         = utf8only
+prompt              = no
 
 ####################################################################
 [ ca_distinguished_name ]
