@@ -1,4 +1,4 @@
-FROM centurylink/openssl
+FROM polledina/debianopenssl
 
 
 #copy ca certificate
