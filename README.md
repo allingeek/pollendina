@@ -14,6 +14,7 @@ Provisioning a service for use in a new container would consist of the following
 ## Generate pollendina image
 
 cd service/src
+
 docker build -t pollendina/debian .
 
 
