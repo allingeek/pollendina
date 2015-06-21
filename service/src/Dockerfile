@@ -1,6 +1,8 @@
 FROM pollendina/debianopenssl:jessie
-COPY ./service.go /pollendina/
+COPY . /pollendina/
+VOLUME ["/opt/pollendina", "/var/crt", "/var/csr"]
 WORKDIR /pollendina
 RUN apt-get install -y golang-go && go build -v && mv pollendina /usr/bin/pollendina && apt-get remove -y golang-go
-WORKDIR /opt/pollendina
+ENTRYPOINT ["./init.sh"]
 CMD pollendina
+
