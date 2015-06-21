@@ -25,9 +25,9 @@ The above command will start Pollendina in a new container and provision a new C
 
   - [Jeff Nickoloff](https://github.com/allingeek)
   - [Dário Nascimento](https://github.com/dnascimento)
-  - [Jason Huddleston](https://github.com/huddlesj)
+  - [Jason Huddleston](https://github.com/huddlesj) [Docker newbie]
   - [Madhuri Yechuri](https://github.com/myechuri)
-  - [Henry Kendall](https://github.com/hskendall)
+  - [Henry Kendall](https://github.com/hskendall) [Docker newbie]
 
 ## API Guide
 
