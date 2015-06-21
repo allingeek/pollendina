@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os/exec"
         "path"
+        "regexp"
         "encoding/pem" 
 )
 var db = map[string]string{}
@@ -24,14 +25,20 @@ func main() {
 
 	flag.Parse()
 
-	http.HandleFunc("/v1/authorize", Authorize)
-	http.HandleFunc("/v1/sign", Sign)
+        rh := new(RegexHandler)
+
+
+        authPathPattern,_ := regexp.Compile("/v1/authorize")
+        signPathPattern,_ := regexp.Compile("/v1/sign/.*")
+
+	rh.HandleFunc(authPathPattern, Authorize)
+	rh.HandleFunc(signPathPattern, Sign)
 
         go MapWriter()
 
 	// Placeholder for authentication / authorization middleware on authorize call.
 
-	err := http.ListenAndServe(":33004", nil)
+	err := http.ListenAndServe(":33004", rh)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
@@ -137,3 +144,33 @@ func Sign(w http.ResponseWriter, req *http.Request) {
         outputData, err := ioutil.ReadFile(outputFile)
 	w.Write(outputData)
 }
+
+type MuxRoute struct {
+    pattern *regexp.Regexp
+    handler http.Handler
+}
+
+type RegexHandler struct {
+    rs []*MuxRoute
+}
+
+func (rh *RegexHandler) Handler(p *regexp.Regexp, h http.Handler) {
+    rh.rs = append(rh.rs, &MuxRoute{p, h})
+}
+
+func (rh *RegexHandler) HandleFunc(p *regexp.Regexp, h func(http.ResponseWriter, *http.Request)) {
+    rh.rs = append(rh.rs, &MuxRoute{p, http.HandlerFunc(h)})
+}
+
+func (rh *RegexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    for _, route := range rh.rs {
+        if route.pattern.MatchString(r.URL.Path) {
+            route.handler.ServeHTTP(w, r)
+            return
+        }
+    }
+    log.Println("missed")
+    // no pattern matched; send 404 response
+    http.NotFound(w, r)
+}
+
