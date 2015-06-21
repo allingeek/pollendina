@@ -31,6 +31,18 @@ The above command will start Pollendina in a new container and provision a new C
 
 ## API Guide
 
+```
+  POST /v1/authorize HTTP/1.1
+
+  cn=<client common name>&token=<one-time-token>
+```
+
+```
+  PUT /v1/sign/<one-time-token>
+  
+  *include CSR in PUT body*
+```
+
   Pollendina CA can be used / tested standalone, without a client container, using ``curl`` client:
 
   `curl --data "cn=dario&token=100" http://192.168.59.103:33004/v1/authorize`
