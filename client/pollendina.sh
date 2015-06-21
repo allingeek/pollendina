@@ -14,7 +14,7 @@ openssl req  -new -newkey rsa:4096 -days 365 -nodes -subj "${CERTIFICATE_INFO}" 
 echo Authenticating with token: $POLLENDINA_TOCKEN
 
 # Send CSR to Certificate Authority
-curl --cacert /certs/cacert.pem -X PUT -s -D status --data "$(cat /certs/${KEY_NAME}.csr)" http://$CA_IP/vi/sign/${POLLENDINA_TOCKEN}:33004 -o /certs/${KEY_NAME}.crt
+curl --cacert /certs/cacert.pem -X PUT -s -D status --data "$(cat /certs/${KEY_NAME}.csr)" http://$CA_IP:33004/vi/sign/${POLLENDINA_TOCKEN} -o /certs/${KEY_NAME}.crt
 
 STATUS=$(cat status | grep HTTP/1.1 | awk {'print $2'})
 
