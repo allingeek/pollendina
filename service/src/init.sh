@@ -8,7 +8,7 @@
 
 #Files to copy in
 #FILES=(openssl-ca.cnf cacert.pem cakey.pem index.txt serial.txt)
-FILES=(openssl-ca.cnf cakey.pem index.txt serial.txt)
+FILES=(openssl-ca.cnf index.txt serial.txt)
 #Source directory
 SDIR="/pollendina"
 #Destination directory
@@ -21,9 +21,11 @@ for i in ${FILES[@]}; do
   fi
 done
 
-if [ -f $DDIR/cakey.pem ];then 
+if [ ! -f $DDIR/cakey.pem ];then 
+  cd $DDIR
   openssl req -x509 -config openssl-ca.cnf -newkey rsa:4096 -sha256 -nodes -out cacert.pem -outform PEM
-if
+fi
 
 
 exec "$@" # run the default command
+

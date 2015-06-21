@@ -15,17 +15,16 @@ Provisioning a service for use in a new container would consist of the following
 * Pollendina signs the CSR with the organization's CA private key and returns the PEM encoded public key for the service in the requesting container (X.509 subject).
 * The calling container installs the returned certificate and private key (either keep it in memory or write it encrypted to a volume).
 
-
-## Generate pollendina image
+## Generate pollendina image and start a container
 
 cd service/src
 
-docker build -t pollendina/debian .
+docker build -t pollendina .
 
+docker run -d --name pollendina_ca -p 33004:33004 pollendina
 
 ## Generate base image
 docker build -t <username>/<imageName> .
-
 
 ## Run base image
 docker run -i -t <username>/<imageName> /bin/bash
@@ -51,7 +50,7 @@ docker run -i -t <username>/<imageName> /bin/bash
 
 ## API Guide
 
-  See the API.md file for more details
+  See the [API.md] file for more details
 
 ## Resources
 
