@@ -31,11 +31,15 @@ The above command will start Pollendina in a new container and provision a new C
 
 ## API Guide
 
+Prior to provisioing a container for a microservice, the provisioning agent should post an authorization to Pollendina at /v1/authorize.
+
 ```
   POST /v1/authorize HTTP/1.1
 
   cn=<client common name>&token=<one-time-token>
 ```
+
+After the authorization has been registered, the provisioner should pass the token to the new container as an environment variable. That new container will then make the call to /v1/sign/<token> to retreive a signed certificate.
 
 ```
   PUT /v1/sign/<one-time-token>
