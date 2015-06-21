@@ -2,6 +2,7 @@
 
 #GLOBAL VARS REQUIRED: CA_IP, COMMON_NAME
 KEY_NAME="id"
+ENV COMMON_NAME=pollendina CA_IP=192.168.1.1 COUNTRY=US STATE=California CITY=SF ORGANIZATION=Pollendina COMMON_NAME=Pollendina
 
 CERTIFICATE_INFO="/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}$/CN=${COMMON_NAME}"
 
@@ -13,7 +14,7 @@ openssl req  -new -newkey rsa:4096 -days 365 -nodes -subj "${CERTIFICATE_INFO}" 
 echo Authenticating with token: $POLLENDINA
 
 # Send CSR to Certificate Authority
-curl -X PUT -s -D status --data "$(cat /certs/${KEY_NAME}.csr)" https://$CA_IP/vi/sign/${POLLENDINA_TOCKEN} -o /certs/${KEY_NAME}.crt
+curl --cacert /certs/cacert.pem -X PUT -s -D status --data "$(cat /certs/${KEY_NAME}.csr)" https://$CA_IP/vi/sign/${POLLENDINA_TOCKEN} -o /certs/${KEY_NAME}.crt
 
 STATUS=$(cat status | grep HTTP/1.1 | awk {'print $2'})
 
