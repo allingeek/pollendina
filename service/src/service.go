@@ -3,13 +3,18 @@ package main
 import (
 	"crypto/x509"
 	"flag"
+        "fmt"
+        "log"
 	"io/ioutil"
+        "math/rand"
 	"net/http"
 	"os/exec"
 	"time"
+        "encoding/pem" 
 )
-
 var db = map[string]int{}
+var csrLocation = "/var/csr"
+var crtLocation = "/var/crt"
 
 func main() {
 
@@ -20,7 +25,7 @@ func main() {
 
 	// Placeholder for authentication / authorization middleware on authorize call.
 
-	err := http.ListenAndServe(":12345", nil)
+	err := http.ListenAndServe(":33004", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
@@ -34,13 +39,20 @@ func Authorize(w http.ResponseWriter, req *http.Request) {
 	ttl := req.FormValue("ttl")
 
 	// Construct ttl
-	d := time.ParseDuration(ttl)
+	d, err := time.ParseDuration(ttl)
+        if err != nil {
+            log.Println(err)
+            w.WriteHeader(http.StatusBadRequest)
+            return
+        }
 	expires := time.Now().Add(d)
 
 	// queue for write to map
 	// ...
 
-	w.Write("")
+        log.Println("Service: " + sn)
+        log.Println("Expires: " + expires.String())
+
 	req.Body.Close()
 }
 
@@ -48,29 +60,27 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	log.Println("Received sign call.")
 
 	// Upload the CSR and copy it to some known location
-	r.ParseMultipartForm(32 << 20)
-	file, handler, err := r.FormFile("uploadfile")
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	rawFilename := "./test/" + handler.Filename
+        body, err := ioutil.ReadAll(req.Body)
+        if err != nil {
+                log.Println(err)
+                w.WriteHeader(http.StatusBadRequest)
+                return 
+        }
 
-	defer file.Close()
-	fmt.Fprintf(w, "%v", handler.Header)
-	f, err := os.OpenFile(rawFilename, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	io.Copy(f, file)
-	f.Close()
+        randoName := fmt.Sprintf("%d.csr", rand.Int63())
+        csrFilename := "/Users/jnickol/test/" + randoName
+        err = ioutil.WriteFile(csrFilename, body, 0777)
+        if err != nil {
+                log.Println(err)
+                w.WriteHeader(http.StatusInternalServerError)
+                return
+        }
+        log.Println("File uploaded.")
 
 	// Parse the CSR
-	rawCSR, _ := ioutil.ReadFile(rawFilename)
-	csr, err := x509.ParseCertificateRequest(rawCSR)
+	rawCSR, _ := ioutil.ReadFile(csrFilename)
+        decodedCSR, _ := pem.Decode(rawCSR)
+	csr, err := x509.ParseCertificateRequest(decodedCSR.Bytes)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -92,18 +102,21 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	e_flag := "-extensions"
 	e_value := "signing_req"
 	o_flag := "-out"
-	outputFile := "./test/" + handler.Filename + ".crt"
+	outputFile := "/Users/jnickol/test/" + randoName + ".crt"
 	i_flag := "-infiles"
+        v_flag := "-verbose"
 
 	// Sign the CSR with OpenSSL
-	cmd := exec.Command(app, command, c_flag, c_value, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, rawFilename)
-	stdout, err := cmd.Output()
+	cmd := exec.Command(app, command, v_flag, c_flag, c_value, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, csrFilename)
+        stdOut, err := cmd.Output()
 	if err != nil {
-		log.Println(err)
+                log.Println("STDOUT: " + string(stdOut))
+		log.Println("STDERR: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	// Open the output file for reading and stream it back on the response
-	w.Write(string(ioutil.ReadFile(outputFile)))
+        outputData, err := ioutil.ReadFile(outputFile)
+	w.Write(outputData)
 }
