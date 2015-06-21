@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"flag"
+        "fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -20,13 +21,11 @@ var csrLocation = "/var/csr/"
 var crtLocation = "/var/crt/"
 var confLocation = "/opt/pollendina/openssl-ca.cnf"
 
+var port = flag.Int("port", 33004, "Default port for Pollendina CA.")
+
 type Tuple struct{ CN, Token string }
 
 var updates = make(chan Tuple)
-
-const (
-	PORT = ":33004"
-)
 
 var (
 	Info    *log.Logger
@@ -70,7 +69,7 @@ func main() {
 
 	// Placeholder for authentication / authorization middleware on authorize call.
 
-	err := http.ListenAndServe(PORT, rh)
+	err := http.ListenAndServe(*port, rh)
 	if err != nil {
 		Error.Println(err)
 	}
