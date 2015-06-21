@@ -30,7 +30,7 @@ docker run -i -t <username>/<imageName> /bin/bash
   - Jeff Nickoloff (allingeek)
   - Jason Huddleston (huddlesj)
   - Dário Nascimento (dnascimento)
-  - Maduri Yechuri (myechuri)
+  - Madhuri Yechuri (myechuri)
   - Henry Kendall (hskendall)
 
 ## API Guide
