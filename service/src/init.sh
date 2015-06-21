@@ -7,7 +7,8 @@
 #   serial.txt
 
 #Files to copy in
-FILES=(openssl-ca.cnf cacert.pem cakey.pem index.txt serial.txt)
+#FILES=(openssl-ca.cnf cacert.pem cakey.pem index.txt serial.txt)
+FILES=(openssl-ca.cnf cakey.pem index.txt serial.txt)
 #Source directory
 SDIR="/pollendina"
 #Destination directory
@@ -20,13 +21,9 @@ for i in ${FILES[@]}; do
   fi
 done
 
-# touch /opt/pollendina/index.txt
-
-#echo 01 >> /opt/pollendina/serial.txt
-
-# openssl req -x509 -config openssl-ca.cnf -newkey rsa:4096 -sha256 -nodes -out cacert.pem -outform PEM
-
-# cp /pollendina/openssl-ca.cnf /opt/pollendina/openssl-ca.cnf
+if [ -f $DDIR/cakey.pem ];do 
+  openssl req -x509 -config openssl-ca.cnf -newkey rsa:4096 -sha256 -nodes -out cacert.pem -outform PEM
+done
 
 
 exec "$@" # run the default command
