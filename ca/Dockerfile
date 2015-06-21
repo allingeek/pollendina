@@ -1,5 +1,4 @@
 FROM polledina/debianopenssl
 
-
-#copy ca certificate
+#Copy Certificate Authority certificate to /certs
 COPY cacert.pem /certs

@@ -23,6 +23,12 @@ docker build -t <username>/<imageName> .
 ## Run base image
 docker run -i -t <username>/<imageName> /bin/bash
 
+1st: Generate root certificate key using generator image
+2nd: Build /example image with the root certificate
+3th: Launch the CA container
+4th: Launch containers
+
+
 
 
 ## Main Contributors 
