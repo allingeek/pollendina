@@ -4,12 +4,12 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"flag"
-        "io"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
-        "os"
+	"os"
 	"os/exec"
 	"path"
 	"regexp"
@@ -25,38 +25,38 @@ type Tuple struct{ CN, Token string }
 var updates = make(chan Tuple)
 
 const (
-    PORT       = ":33004"
+	PORT = ":33004"
 )
 
 var (
-    Info    *log.Logger
-    Warning *log.Logger
-    Error   *log.Logger
+	Info    *log.Logger
+	Warning *log.Logger
+	Error   *log.Logger
 )
 
 func InitLogs(
-    infoHandle io.Writer,
-    warningHandle io.Writer,
-    errorHandle io.Writer) {
+	infoHandle io.Writer,
+	warningHandle io.Writer,
+	errorHandle io.Writer) {
 
-    Info = log.New(infoHandle,
-        "INFO: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
+	Info = log.New(infoHandle,
+		"INFO: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
 
-    Warning = log.New(warningHandle,
-        "WARNING: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
+	Warning = log.New(warningHandle,
+		"WARNING: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
 
-    Error = log.New(errorHandle,
-        "ERROR: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
+	Error = log.New(errorHandle,
+		"ERROR: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
 }
 
 func main() {
 
 	flag.Parse()
 
-        InitLogs(os.Stdout, os.Stdout, os.Stderr)
+	InitLogs(os.Stdout, os.Stdout, os.Stderr)
 
 	rh := new(RegexHandler)
 
@@ -77,17 +77,17 @@ func main() {
 }
 
 func MapWriter() {
-      for {
-              select {
-                      case t,ok := <-updates:
-                          if (!ok) {
-                               Error.Println("Publisher channel closed. Stopping.")
-                               return
-                          }
-                          Info.Println("Setting key %s to value %s", t.Token, t.CN)
-                          db[t.Token] = t.CN
-              }
-      }
+	for {
+		select {
+		case t, ok := <-updates:
+			if !ok {
+				Error.Println("Publisher channel closed. Stopping.")
+				return
+			}
+			Info.Println("Setting key %s to value %s", t.Token, t.CN)
+			db[t.Token] = t.CN
+		}
+	}
 }
 
 func Authorize(w http.ResponseWriter, req *http.Request) {
@@ -101,8 +101,8 @@ func Authorize(w http.ResponseWriter, req *http.Request) {
 	t := Tuple{cn, token}
 	updates <- t
 
-        Info.Println("Service: %s", cn)
-        Info.Println("Token: %s", token)
+	Info.Println("Service: %s", cn)
+	Info.Println("Token: %s", token)
 
 	req.Body.Close()
 }
@@ -110,42 +110,42 @@ func Authorize(w http.ResponseWriter, req *http.Request) {
 func Sign(w http.ResponseWriter, req *http.Request) {
 	Info.Println("Received sign call.")
 
-        // Pull the token out of the path
-        _, token := path.Split(req.URL.Path)
-        Info.Println("Received signing request for token %s", token)
+	// Pull the token out of the path
+	_, token := path.Split(req.URL.Path)
+	Info.Println("Received signing request for token %s", token)
 
-        if len(token) == 0 {
-                Warning.Println("No token provided.")
-                w.WriteHeader(http.StatusBadRequest)
-                return
-        }
+	if len(token) == 0 {
+		Warning.Println("No token provided.")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	// Get the registered CN for the provided token (or fail)
 	authCn := db[token]
 
-        if (authCn == "") {
-                Warning.Println("Unauthorized CN.")
-                w.WriteHeader(http.StatusUnauthorized)
-                return
-        }
+	if authCn == "" {
+		Warning.Println("Unauthorized CN.")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	// Upload the CSR and copy it to some known location
-        body, err := ioutil.ReadAll(req.Body)
-        if err != nil {
-                Error.Println(err.Error())
-                w.WriteHeader(http.StatusBadRequest)
-                return 
-        }
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		Error.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-        randoName := fmt.Sprintf("%d.csr", rand.Int63())
-        csrFilename := csrLocation + randoName
-        err = ioutil.WriteFile(csrFilename, body, 0777)
-        if err != nil {
-                Error.Println(err.Error())
-                w.WriteHeader(http.StatusInternalServerError)
-                return
-        }
-        Info.Println("File uploaded.")
+	randoName := fmt.Sprintf("%d.csr", rand.Int63())
+	csrFilename := csrLocation + randoName
+	err = ioutil.WriteFile(csrFilename, body, 0777)
+	if err != nil {
+		Error.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	Info.Println("File uploaded.")
 
 	// Parse the CSR
 	rawCSR, _ := ioutil.ReadFile(csrFilename)
@@ -158,13 +158,13 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	}
 
 	Info.Println("Received CSR for: %s", csr.Subject.CommonName)
-        
+
 	// check authorization for the provided commonname
-        if (csr.Subject.CommonName != authCn) {
-                Warning.Println("Unauthorized CN %s", csr.Subject.CommonName)
-                w.WriteHeader(http.StatusUnauthorized)
-                return
-        }
+	if csr.Subject.CommonName != authCn {
+		Warning.Println("Unauthorized CN %s", csr.Subject.CommonName)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	// Build the command for exec
 	// openssl ca -config openssl-ca.cnf -policy signing_policy -extensions signing_req -out servercert.pem -infiles servercert.csr
@@ -186,7 +186,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	fmt.Println(args)
 	stdOut, err := cmd.Output()
 	if err != nil {
-                Error.Println("OpenSSL stdout: %s", string(stdOut))
+		Error.Println("OpenSSL stdout: %s", string(stdOut))
 		Error.Println("OpenSSL stderr: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -215,13 +215,13 @@ func (rh *RegexHandler) HandleFunc(p *regexp.Regexp, h func(http.ResponseWriter,
 }
 
 func (rh *RegexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    for _, route := range rh.rs {
-        if route.pattern.MatchString(r.URL.Path) {
-            route.handler.ServeHTTP(w, r)
-            return
-        }
-    }
-    Warning.Println("Route not found: %s", r.URL.Path)
-    // no pattern matched; send 404 response
-    http.NotFound(w, r)
+	for _, route := range rh.rs {
+		if route.pattern.MatchString(r.URL.Path) {
+			route.handler.ServeHTTP(w, r)
+			return
+		}
+	}
+	Warning.Println("Route not found: %s", r.URL.Path)
+	// no pattern matched; send 404 response
+	http.NotFound(w, r)
 }
