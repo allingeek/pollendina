@@ -36,12 +36,16 @@ docker run -i -t <username>/<imageName> /bin/bash
 
 `docker run -d --name pollendina_ca -p 33004:33004 -v /var/csr -v /var/crt -v "$PWD":/opt/pollendina/ pollendina/debian`
 
+## Architecture
+
+* Pollendina server signs requests using openssl-ca.cnf, cakey.pem, index.txt, and serial.txt.
+
 ## Main Contributors 
 
   - Jeff Nickoloff (allingeek)
   - Jason Huddleston (huddlesj)
   - Dário Nascimento (dnascimento)
-  - Maduri Yechuri (myechuri)
+  - Madhuri Yechuri (myechuri)
   - Henry Kendall (hskendall)
 
 ## API Guide
