@@ -4,7 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"flag"
-        "fmt"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -94,6 +94,10 @@ func Authorize(w http.ResponseWriter, req *http.Request) {
 	// Parse input
 	cn := req.FormValue("cn")
 	token := req.FormValue("token")
+	life := req.FormValue("lifeInSeconds")
+
+	// TODO: sign certificate with provided expiration date
+	fmt.Println("need to incorporate lifeInSeconds for signed cert expriation ts")
 
 	// queue for write to map
 	// ...
