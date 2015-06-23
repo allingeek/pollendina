@@ -19,12 +19,13 @@ import (
 
 func main() {
 
-	var token = flag.String("token", "", "The Pollendina provisioning token.")
+	var token = flag.String("token", "400", "The Pollendina provisioning token.")
 	var endpoint = flag.String("host", ":33004", "Default port for Pollendina CA.")
-	var cn = flag.String("cn", "Default", "Default common name.")
-	var caFile = flag.String("cacert", "", "The relevant CA certificate.")
+	var cn = flag.String("cn", "Tommy", "Default common name.")
+	var caFile = flag.String("cacert", "./cacert.pem", "The relevant CA certificate.")
 	var keyFileOut = flag.String("keyout", "/etc/certs/client-key.pem", "The locattion where the client private key will be written.")
 	var crtFileOut = flag.String("certout", "/etc/certs/client-cert.pem", "The locattion where the client certificate will be written.")
+        flag.Parse()
 
 	// Load the CA certificate from the specified file
 	cacert, err := ioutil.ReadFile(*caFile)
@@ -96,7 +97,7 @@ func shipCSR(csr *[]byte, token *string, endpoint *string, pool *x509.CertPool) 
 	client := &http.Client{
 		Transport:     tr,
 	}
-	req, err := http.NewRequest("PUT", fmt.Sprintf("https://%s/v1/sign/%s", endpoint, token), bytes.NewReader(*csr))
+	req, err := http.NewRequest("PUT", fmt.Sprintf("https://%s/v1/sign/%s", *endpoint, *token), bytes.NewReader(*csr))
 	if err != nil {
 		log.Fatal("Unable to form the HTTPS request.", err)
 		return nil, err
