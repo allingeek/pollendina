@@ -61,6 +61,7 @@ There is a great answer on StackOverflow that goes over running a certificate au
 
 1. Move client initialization out of init script and into a container provisioning hook
 2. Remove any client dependency on OpenSSL
+3. Write generated client key on tmpfs mount.
 3. Move to golang native SSL in Pollendina service
 4. Implement persistent CSR authorization database
 5. CA configuration and state to distributed store to scale Pollendina horizontally
