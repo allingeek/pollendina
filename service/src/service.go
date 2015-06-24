@@ -94,7 +94,7 @@ func Authorize(w http.ResponseWriter, req *http.Request) {
 	// Parse input
 	cn := req.FormValue("cn")
 	token := req.FormValue("token")
-	life := req.FormValue("lifeInSeconds")
+	// life := req.FormValue("lifeInSeconds")
 
 	// TODO: sign certificate with provided expiration date
 	fmt.Println("need to incorporate lifeInSeconds for signed cert expriation ts")
@@ -157,12 +157,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	decodedCSR, err := pem.Decode(rawCSR)
-	if err != nil {
-		Error.Println(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	decodedCSR, _ := pem.Decode(rawCSR)
 	csr, err := x509.ParseCertificateRequest(decodedCSR.Bytes)
 	if err != nil {
 		Error.Println(err.Error())
