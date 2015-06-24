@@ -97,28 +97,28 @@ func Authorize(w http.ResponseWriter, req *http.Request) {
 	// life := req.FormValue("lifeInSeconds")
 
 	// TODO: sign certificate with provided expiration date
-	fmt.Printf("need to incorporate lifeInSeconds for signed cert expriation ts")
+	fmt.Printf("TODO: Need to incorporate lifeInSeconds for signed cert expriation ts\n")
 
 	// queue for write to map
 	// ...
 	t := Tuple{cn, token}
 	updates <- t
 
-	Info.Printf("Service: %s", cn)
-	Info.Printf("Token: %s", token)
+	Info.Printf("Service: %s\n", cn)
+	Info.Printf("Token: %s\n", token)
 
 	req.Body.Close()
 }
 
 func Sign(w http.ResponseWriter, req *http.Request) {
-	Info.Printf("Received sign call.")
+	Info.Printf("Received sign call.\n")
 
 	// Pull the token out of the path
 	_, token := path.Split(req.URL.Path)
-	Info.Printf("Received signing request for token %s", token)
+	Info.Printf("Received signing request for token %s\n", token)
 
 	if len(token) == 0 {
-		Warning.Printf("No token provided.")
+		Warning.Printf("No token provided.\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -127,7 +127,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	authCn := db[token]
 
 	if authCn == "" {
-		Warning.Printf("Unauthorized CN.")
+		Warning.Printf("Unauthorized CN.\n")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -135,7 +135,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	// Upload the CSR and copy it to some known location
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		Error.Printf(err.Error())
+		Error.Printf("%s\n", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -144,32 +144,32 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	csrFilename := csrLocation + randoName
 	err = ioutil.WriteFile(csrFilename, body, 0777)
 	if err != nil {
-		Error.Printf(err.Error())
+		Error.Printf("%s\n",err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	Info.Printf("File uploaded.")
+	Info.Printf("File uploaded.\n")
 
 	// Parse the CSR
 	rawCSR, err := ioutil.ReadFile(csrFilename)
 	if err != nil {
-		Error.Printf(err.Error())
+		Error.Printf("%s\n", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	decodedCSR, _ := pem.Decode(rawCSR)
 	csr, err := x509.ParseCertificateRequest(decodedCSR.Bytes)
 	if err != nil {
-		Error.Printf(err.Error())
+		Error.Printf("%s\n", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	Info.Printf("Received CSR for: %s", csr.Subject.CommonName)
+	Info.Printf("Received CSR for: %s\n", csr.Subject.CommonName)
 
 	// check authorization for the provided commonname
 	if csr.Subject.CommonName != authCn {
-		Warning.Printf("Unauthorized CN %s", csr.Subject.CommonName)
+		Warning.Printf("Unauthorized CN %s\n", csr.Subject.CommonName)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
