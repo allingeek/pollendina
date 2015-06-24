@@ -21,7 +21,17 @@ Provisioning a service for use in a new container would consist of the following
 
 The above command will start Pollendina in a new container and provision a new CA in the present working directory. The files created at PWD represent the full state of the CA. If Pollendina is stopped, and another Pollendina container is started from this folder it will resume the state of the previous CA. One file named openssl-ca.cnf is created. You can customize the settings for your CA by modifying this file and restarting Pollendina.
 
-## Main Contributors 
+## About the Project
+
+Pollendina was consieved in the months leading up to DockerCon 2015. Jeff Nickoloff submitted the idea for a hackathon project based on real world needs he encountered building microservices. During the hackathon he met and was joined by Dário Nascimento, Jason Huddleston, Madhuri Yechuri, and Henry Kendall. Each member of the team brought a unique set of skills and experience. They decided to use Golang where they could, shell and OpenSSL for the especially sensitive portions of the project in an effort to maximize their chances of building a working proof of concept. They worked through the night and Jeff presented the project for the judges the next day. The project took second place.
+
+With a working proof of concept, and a real need for the project in development of other services, Jeff and a few other team members decided to continue development after the conference.
+
+## Project Contributors
+
+  - [Jeff Nickoloff](https://github.com/allingeek)
+
+## Hackathon Contributors 
 
   - [Jeff Nickoloff](https://github.com/allingeek)
   - [Dário Nascimento](https://github.com/dnascimento)
