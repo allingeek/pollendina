@@ -151,8 +151,18 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	Info.Println("File uploaded.")
 
 	// Parse the CSR
-	rawCSR, _ := ioutil.ReadFile(csrFilename)
-	decodedCSR, _ := pem.Decode(rawCSR)
+	rawCSR, err := ioutil.ReadFile(csrFilename)
+	if err != nil {
+		Error.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	decodedCSR, err := pem.Decode(rawCSR)
+	if err != nil {
+		Error.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	csr, err := x509.ParseCertificateRequest(decodedCSR.Bytes)
 	if err != nil {
 		Error.Println(err.Error())
