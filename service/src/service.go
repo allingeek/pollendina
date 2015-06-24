@@ -80,45 +80,45 @@ func MapWriter() {
 		select {
 		case t, ok := <-updates:
 			if !ok {
-				Error.Println("Publisher channel closed. Stopping.")
+				Error.Printf("Publisher channel closed. Stopping.")
 				return
 			}
-			Info.Println("Setting key %s to value %s", t.Token, t.CN)
+			Info.Printf("Setting key %s to value %s", t.Token, t.CN)
 			db[t.Token] = t.CN
 		}
 	}
 }
 
 func Authorize(w http.ResponseWriter, req *http.Request) {
-	Info.Println("Received authorize call.")
+	Info.Printf("Received authorize call.")
 	// Parse input
 	cn := req.FormValue("cn")
 	token := req.FormValue("token")
 	// life := req.FormValue("lifeInSeconds")
 
 	// TODO: sign certificate with provided expiration date
-	fmt.Println("need to incorporate lifeInSeconds for signed cert expriation ts")
+	fmt.Printf("need to incorporate lifeInSeconds for signed cert expriation ts")
 
 	// queue for write to map
 	// ...
 	t := Tuple{cn, token}
 	updates <- t
 
-	Info.Println("Service: %s", cn)
-	Info.Println("Token: %s", token)
+	Info.Printf("Service: %s", cn)
+	Info.Printf("Token: %s", token)
 
 	req.Body.Close()
 }
 
 func Sign(w http.ResponseWriter, req *http.Request) {
-	Info.Println("Received sign call.")
+	Info.Printf("Received sign call.")
 
 	// Pull the token out of the path
 	_, token := path.Split(req.URL.Path)
-	Info.Println("Received signing request for token %s", token)
+	Info.Printf("Received signing request for token %s", token)
 
 	if len(token) == 0 {
-		Warning.Println("No token provided.")
+		Warning.Printf("No token provided.")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -127,7 +127,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	authCn := db[token]
 
 	if authCn == "" {
-		Warning.Println("Unauthorized CN.")
+		Warning.Printf("Unauthorized CN.")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -135,7 +135,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	// Upload the CSR and copy it to some known location
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		Error.Println(err.Error())
+		Error.Printf(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -144,32 +144,32 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	csrFilename := csrLocation + randoName
 	err = ioutil.WriteFile(csrFilename, body, 0777)
 	if err != nil {
-		Error.Println(err.Error())
+		Error.Printf(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	Info.Println("File uploaded.")
+	Info.Printf("File uploaded.")
 
 	// Parse the CSR
 	rawCSR, err := ioutil.ReadFile(csrFilename)
 	if err != nil {
-		Error.Println(err.Error())
+		Error.Printf(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	decodedCSR, _ := pem.Decode(rawCSR)
 	csr, err := x509.ParseCertificateRequest(decodedCSR.Bytes)
 	if err != nil {
-		Error.Println(err.Error())
+		Error.Printf(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	Info.Println("Received CSR for: %s", csr.Subject.CommonName)
+	Info.Printf("Received CSR for: %s", csr.Subject.CommonName)
 
 	// check authorization for the provided commonname
 	if csr.Subject.CommonName != authCn {
-		Warning.Println("Unauthorized CN %s", csr.Subject.CommonName)
+		Warning.Printf("Unauthorized CN %s", csr.Subject.CommonName)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -191,11 +191,11 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	// Sign the CSR with OpenSSL
 	cmd := exec.Command(app, command, b_flag, c_flag, confLocation, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, csrFilename)
 	args := fmt.Sprintf("%s %s %s %s %s %s %s %s %s %s %s %s %s", app, command, b_flag, c_flag, confLocation, p_flag, p_value, e_flag, e_value, o_flag, outputFile, i_flag, csrFilename)
-	fmt.Println(args)
+	fmt.Printf(args)
 	stdOut, err := cmd.Output()
 	if err != nil {
-		Error.Println("OpenSSL stdout: %s", string(stdOut))
-		Error.Println("OpenSSL stderr: %s", err.Error())
+		Error.Printf("OpenSSL stdout: %s", string(stdOut))
+		Error.Printf("OpenSSL stderr: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -229,7 +229,7 @@ func (rh *RegexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	Warning.Println("Route not found: %s", r.URL.Path)
+	Warning.Printf("Route not found: %s", r.URL.Path)
 	// no pattern matched; send 404 response
 	http.NotFound(w, r)
 }
