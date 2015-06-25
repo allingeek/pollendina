@@ -67,13 +67,5 @@ After the authorization has been registered, the provisioner should pass the tok
 
 There is a great answer on StackOverflow that goes over running a certificate authority, and creating certificates at: http://stackoverflow.com/questions/21297139/how-do-you-sign-certificate-signing-request-with-your-certification-authority
 
-## Further Development
+## Roadmap
 
-1. Move client initialization out of init script and into a container provisioning hook
-2. ✔ Remove any client dependency on OpenSSL
-3. ✔ Write generated client key on tmpfs mount.
-3. ✘ Move to golang native SSL in Pollendina service
-4. Implement persistent CSR authorization database
-5. CA configuration and state to distributed store to scale Pollendina horizontally
-6. Record metrics for authorization/signing attempts
-7. Blackhole clients that submit bad CSRs or tokens beyond some threshold
