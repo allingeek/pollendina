@@ -83,8 +83,12 @@ func MapWriter() {
 				Error.Printf("Publisher channel closed. Stopping.")
 				return
 			}
-			Info.Printf("Setting key %s to value %s", t.Token, t.CN)
-			db[t.Token] = t.CN
+			if t.CN == "" {
+				delete(db, t.Token)
+			} else {
+				Info.Printf("Setting key %s to value %s", t.Token, t.CN)
+				db[t.Token] = t.CN
+			}
 		}
 	}
 }
@@ -203,6 +207,9 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	// Open the output file for reading and stream it back on the response
 	outputData, err := ioutil.ReadFile(outputFile)
 	w.Write(outputData)
+
+        t := Tuple{"", token}
+        updates <- t
 }
 
 type MuxRoute struct {
