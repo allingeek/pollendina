@@ -1,3 +1,7 @@
+/*
+*  Pollendina Native Client
+*  Author: Jeff Nickoloff
+*/
 package main
 
 import (
