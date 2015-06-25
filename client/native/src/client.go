@@ -17,6 +17,7 @@ import (
 	"os"
 	"path"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -42,7 +43,9 @@ func main() {
 	}
 
 	// Generate the private key
+	pkTimeStart := time.Now()
 	key, err := rsa.GenerateKey(rand.Reader, *keysize)
+	log.Printf("[TIMER] [%s] Generated PK\n", time.Since(pkTimeStart))
 	if err != nil {
 		log.Fatal("Unable to generate a private key.", err)
 		os.Exit(1)
@@ -61,7 +64,9 @@ func main() {
 		},
 		SignatureAlgorithm: x509.SHA256WithRSA,
 	}
+	csrTimeStart := time.Now()
 	csr, err := x509.CreateCertificateRequest(rand.Reader, &t, key)
+	log.Printf("[TIMER] [%s] Generated CSR\n", time.Since(csrTimeStart))
 	if err != nil {
 		log.Fatal("Unable to generate a CSR.", err)
 		os.Exit(2)
@@ -117,7 +122,9 @@ func shipCSR(csr []byte, token *string, endpoint *string, pool *x509.CertPool) (
 		log.Fatal("Unable to form the HTTPS request.", err)
 		return nil, err
 	}
+	signTimeStart := time.Now()
 	res, err := client.Do(req)
+	log.Printf("[TIMER] [%s] Uploaded CSR and retrieved CRT.", time.Since(signTimeStart))
 	if err != nil {
 		log.Fatal("A problem occurred during communication with the Pollendina CA.", err)
 		return nil, err
@@ -151,6 +158,7 @@ func shipCSR(csr []byte, token *string, endpoint *string, pool *x509.CertPool) (
 // might include some vault.
 func installKey(key *rsa.PrivateKey, location string) error {
 
+	pkDirPrepTimeStart := time.Now()
 	dir := path.Dir(location)
 	// Create destination directory
 	if err := syscall.Mkdir(dir, 0600); err != nil {
@@ -162,13 +170,11 @@ func installKey(key *rsa.PrivateKey, location string) error {
 	}
 
 	// with CAP_SYS_ADMIN we could create a tmpfs mount
-	log.Println("Creating tmpfs mount")
 	if err := syscall.Mount("tmpfs", dir, "tmpfs", 0600, "size=1M"); err != nil {
 		log.Printf("Unable to create tmpfs mount. Do you have CAP_SYS_ADMIN? Error: %s", err)
 	}
+	log.Printf("[TIMER] [%s] Prepared PK storage\n", time.Since(pkDirPrepTimeStart))
 
-	log.Printf("Writing key: %s\n", location)
-	// Write out PEM encoded private key file
 	keyOut, err := os.OpenFile(location, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	defer keyOut.Close()
 
@@ -176,13 +182,16 @@ func installKey(key *rsa.PrivateKey, location string) error {
 		log.Print("failed to open key.pem for writing:", err)
 		return nil
 	}
+	pkFileWriteTimeStart := time.Now()
 	pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)})
+	log.Printf("[TIMER] [%s] Wrote PK\n", time.Since(pkFileWriteTimeStart))
 	return nil
 }
 
 func installCrt(crt []byte, location string) error {
 
-	log.Printf("Writing certificate: %s\n", location)
-	return ioutil.WriteFile(location, crt, 0600)
-
+	crtFileWriteTimeStart := time.Now()
+	err := ioutil.WriteFile(location, crt, 0600)
+	log.Printf("[TIMER] [%s] Wrote CRT\n", time.Since(crtFileWriteTimeStart))
+	return err
 }
