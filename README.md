@@ -11,6 +11,7 @@ The second big question is, "What should my authentication protocol look like?" 
 In an ideal situation you should be able to authenticate unique instances of a client service. It is unlikely that you will want to do so if you use preshared keys and a user management system that is painful to scale. More often than not, developers end up using a single password for each client service. In that situation it becomes more difficult to determine when a key has been compromised and more likely that a key will be compromised. 
 
 Key management nightmares include: 
+
 1. cleartext keys shipped with code
 2. encrypted keys shipped with code (how do you decrypt them?)
 3. cleartext keys co-deployed along side code using configuration management tools
