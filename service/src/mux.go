@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 	"regexp"
-	"github.com/pollendina/logger"
 )
 
 type MuxRoute struct {
@@ -30,6 +29,6 @@ func (rh *RegexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
                         return
                 }
         }
-        logger.Warning.Printf("Route not found: %s", r.URL.Path)
+        Warning.Printf("Route not found: %s", r.URL.Path)
         http.NotFound(w, r)
 }
