@@ -5,15 +5,14 @@ import (
 	"encoding/pem"
 	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
 	"path"
 	"regexp"
+	"github.com/pollendina/logger"
 )
 
 var db = map[string]string{}
@@ -27,35 +26,11 @@ type Tuple struct{ CN, Token string }
 
 var updates = make(chan Tuple)
 
-var (
-	Info    *log.Logger
-	Warning *log.Logger
-	Error   *log.Logger
-)
-
-func InitLogs(
-	infoHandle io.Writer,
-	warningHandle io.Writer,
-	errorHandle io.Writer) {
-
-	Info = log.New(infoHandle,
-		"INFO: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-
-	Warning = log.New(warningHandle,
-		"WARNING: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-
-	Error = log.New(errorHandle,
-		"ERROR: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-}
-
 func main() {
 
 	flag.Parse()
 
-	InitLogs(os.Stdout, os.Stdout, os.Stderr)
+	logger.InitLogs(os.Stdout, os.Stdout, os.Stderr)
 
 	rh := new(RegexHandler)
 
@@ -71,7 +46,7 @@ func main() {
 
 	err := http.ListenAndServe(*port, rh)
 	if err != nil {
-		Error.Println(err)
+		logger.Error.Println(err)
 	}
 }
 
@@ -80,13 +55,13 @@ func MapWriter() {
 		select {
 		case t, ok := <-updates:
 			if !ok {
-				Error.Printf("Publisher channel closed. Stopping.")
+				logger.Error.Printf("Publisher channel closed. Stopping.")
 				return
 			}
 			if t.CN == "" {
 				delete(db, t.Token)
 			} else {
-				Info.Printf("Setting key %s to value %s", t.Token, t.CN)
+				logger.Info.Printf("Setting key %s to value %s", t.Token, t.CN)
 				db[t.Token] = t.CN
 			}
 		}
@@ -94,7 +69,7 @@ func MapWriter() {
 }
 
 func Authorize(w http.ResponseWriter, req *http.Request) {
-	Info.Printf("Received authorize call.")
+	logger.Info.Printf("Received authorize call.")
 	// Parse input
 	cn := req.FormValue("cn")
 	token := req.FormValue("token")
@@ -108,21 +83,21 @@ func Authorize(w http.ResponseWriter, req *http.Request) {
 	t := Tuple{cn, token}
 	updates <- t
 
-	Info.Printf("Service: %s\n", cn)
-	Info.Printf("Token: %s\n", token)
+	logger.Info.Printf("Service: %s\n", cn)
+	logger.Info.Printf("Token: %s\n", token)
 
 	req.Body.Close()
 }
 
 func Sign(w http.ResponseWriter, req *http.Request) {
-	Info.Printf("Received sign call.\n")
+	logger.Info.Printf("Received sign call.\n")
 
 	// Pull the token out of the path
 	_, token := path.Split(req.URL.Path)
-	Info.Printf("Received signing request for token %s\n", token)
+	logger.Info.Printf("Received signing request for token %s\n", token)
 
 	if len(token) == 0 {
-		Warning.Printf("No token provided.\n")
+		logger.Warning.Printf("No token provided.\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -131,7 +106,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	authCn := db[token]
 
 	if authCn == "" {
-		Warning.Printf("Unauthorized CN.\n")
+		logger.Warning.Printf("Unauthorized CN.\n")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -139,7 +114,7 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	// Upload the CSR and copy it to some known location
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		Error.Printf("%s\n", err.Error())
+		logger.Error.Printf("%s\n", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -148,32 +123,32 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	csrFilename := csrLocation + randoName
 	err = ioutil.WriteFile(csrFilename, body, 0777)
 	if err != nil {
-		Error.Printf("%s\n",err.Error())
+		logger.Error.Printf("%s\n",err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	Info.Printf("File uploaded.\n")
+	logger.Info.Printf("File uploaded.\n")
 
 	// Parse the CSR
 	rawCSR, err := ioutil.ReadFile(csrFilename)
 	if err != nil {
-		Error.Printf("%s\n", err.Error())
+		logger.Error.Printf("%s\n", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	decodedCSR, _ := pem.Decode(rawCSR)
 	csr, err := x509.ParseCertificateRequest(decodedCSR.Bytes)
 	if err != nil {
-		Error.Printf("%s\n", err.Error())
+		logger.Error.Printf("%s\n", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	Info.Printf("Received CSR for: %s\n", csr.Subject.CommonName)
+	logger.Info.Printf("Received CSR for: %s\n", csr.Subject.CommonName)
 
 	// check authorization for the provided commonname
 	if csr.Subject.CommonName != authCn {
-		Warning.Printf("Unauthorized CN %s\n", csr.Subject.CommonName)
+		logger.Warning.Printf("Unauthorized CN %s\n", csr.Subject.CommonName)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -198,8 +173,8 @@ func Sign(w http.ResponseWriter, req *http.Request) {
 	fmt.Printf(args)
 	stdOut, err := cmd.Output()
 	if err != nil {
-		Error.Printf("OpenSSL stdout: %s", string(stdOut))
-		Error.Printf("OpenSSL stderr: %s", err.Error())
+		logger.Error.Printf("OpenSSL stdout: %s", string(stdOut))
+		logger.Error.Printf("OpenSSL stderr: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
