@@ -1,2 +1,6 @@
 *.pem
+!example.pem
 *.key
+!example.key
+*.crt
+!example-ca.crt
