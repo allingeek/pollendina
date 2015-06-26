@@ -5,9 +5,7 @@ import (
 	"encoding/pem"
 	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -26,30 +24,6 @@ var port = flag.String("port", ":33004", "Default port for Pollendina CA.")
 type Tuple struct{ CN, Token string }
 
 var updates = make(chan Tuple)
-
-var (
-	Info    *log.Logger
-	Warning *log.Logger
-	Error   *log.Logger
-)
-
-func InitLogs(
-	infoHandle io.Writer,
-	warningHandle io.Writer,
-	errorHandle io.Writer) {
-
-	Info = log.New(infoHandle,
-		"INFO: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-
-	Warning = log.New(warningHandle,
-		"WARNING: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-
-	Error = log.New(errorHandle,
-		"ERROR: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-}
 
 func main() {
 
