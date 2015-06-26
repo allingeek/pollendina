@@ -21,6 +21,32 @@ Provisioning a service for use in a new container would consist of the following
 
 The above command will start Pollendina in a new container and provision a new CA in the present working directory. The files created at PWD represent the full state of the CA. If Pollendina is stopped, and another Pollendina container is started from this folder it will resume the state of the previous CA. One file named openssl-ca.cnf is created. You can customize the settings for your CA by modifying this file and restarting Pollendina.
 
+## Build Instructions
+
+#### Building the Service
+You can build the service as a Docker image or as a stand-alone binary. Either way the following build instructions use Docker because I hate installing and managing arbitrary packages on my machine. As the project progresses I might just breakout the service and client into separate repositories and make them go-getable.
+
+To build the Pollendina service image:
+
+```
+[pollendina/service/src]$ docker build -t local/pollendina .
+```
+
+To build the Pollendina service binary:
+
+```
+[pollendina/service]$ docker run --rm -v "$PWD":/usr/src/pollendina -w /usr/src/pollendina/src golang:1.3 go build -v -o ../pollendina
+```
+
+#### Building the Native Client
+The native client is currently a single binary file. In the near future there will be two distinct build artifacts, a CLI client, and a composable program designed for use as a contianer entrypoint.
+
+To build the native client:
+
+```
+[pollendina/client/native]$ docker run --rm -v "$PWD":/usr/src/client -w /usr/src/client/src golang:1.3 go build -v -o ../client
+```
+
 ## About the Project
 
 Pollendina was consieved in the months leading up to DockerCon 2015. Jeff Nickoloff submitted the idea for a hackathon project based on real world needs he encountered building microservices. During the hackathon he met and was joined by Dário Nascimento, Jason Huddleston, Madhuri Yechuri, and Henry Kendall. Each member of the team brought a unique set of skills and experience. They decided to use Golang where they could, shell and OpenSSL for the especially sensitive portions of the project in an effort to maximize their chances of building a working proof of concept. They worked through the night and Jeff presented the project for the judges the next day. The project took second place.
