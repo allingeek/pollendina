@@ -66,6 +66,10 @@ The above command will start Pollendina in a new container and provision a new C
 
 ## Build Instructions
 
+Adopters using Docker should not need to run a custom build. Both the service and client are available as automated build images through Docker Hub. The latest tag will always contain the latest source from MASTER. Other adopters can download releases from the releases page of this repository.
+
+If you are working on Pollendina, you can use the Dockerfiles for each portion of the project or build it yourself using the Go compiler. Instructions are as follows.
+
 #### Building the Service
 You can build the service as a Docker image or as a stand-alone binary. Either way the following build instructions use Docker because I hate installing and managing arbitrary packages on my machine. As the project progresses I might just breakout the service and client into separate repositories and make them go-getable.
 
